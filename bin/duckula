@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+
+ROOT=$(pwd)
+DUCKULA_DIR=$ROOT/duckula
+WORKING_DIR=$DUCKULA_DIR/tmp
+
+source $DUCKULA_DIR/duckula.conf
+
+SERVICE_DIR=$WORKING_DIR/$REPO_NAME
+CONFIG_DIR=$DUCKULA_DIR/$REPO_NAME
+
+mkdir -p $WORKING_DIR
+cd $WORKING_DIR
+
+up() {
+	if ! [ -d $SERVICE_DIR ]; then
+		git clone --depth=1 $REPO_ADDRESS -b$REPO_BRANCH
+	fi
+	
+	cd $SERVICE_DIR
+	git checkout $REPO_BRANCH
+	git pull origin $REPO_BRANCH
+	cd $DUCKULA_DIR
+	docker-compose up
+}
+
+
+case "$1" in
+	up)
+		$1
+esac
