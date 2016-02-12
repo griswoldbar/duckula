@@ -1,0 +1,1 @@
+cp ./bin/duckula /usr/local/bin/duckula

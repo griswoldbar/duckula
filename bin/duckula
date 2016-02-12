@@ -1,33 +1,160 @@
-#!/bin/bash
+#!/usr/bin/env ruby
+require 'yaml'
+require 'fileutils'
+require 'pry'
 
+module Duckula
+  class DockerCompose
+    def up
+      invoke("up")
+    end
+    
+    def stop
+      invoke("stop")
+    end
 
+    def run(app_name, cmd)
+      invoke("run #{app_name} #{cmd}")
+    end
+    
+    private
+    def invoke(args)
+      system "cd #{DUCKULA_DIR} && docker-compose #{args}"
+    end
+  end
+  
+  class Quacker
+    def puts(str)
+      puts "quack! #{str} quack!"
+    end
+  end
+  
+  def build_apps(config_file)
+    @configs = YAML.load_file(config_file).each_pair.map do |k,v|
+      App.new(k,v)
+    end
+  end
+  
+  def setup_workspace(dir)
+    FileUtils.mkdir_p(dir)
+  end
+  
+  class Engine
+    def initialize(apps, docker_compose)
+      @apps = apps
+      @dc = docker_compose
+    end
+    
+    def run(*args)
+      send(*args)
+    end
+    
+    def up
+      setup_workspaces
+      setup_dbs
+      @dc.up
+    end
+    
+    def stop
+      @dc.stop
+    end
+    
+    def migrate
+      
+    end
+    
+    private
+    def setup_workspaces
+      @apps.each do |app|
+        Fetcher.new(app).fetch
+      end
+    end
+    
+    def setup_dbs
+      @apps.each do |app|
+        DbHandler.new(app, @dc).setup
+      end
+    end
+  end
+  
+  class DbHandler
+    def initialize(app, dc)
+      @app = app
+      @dc = dc
+    end
+    
+    def setup
+      unless running?
+        create_and_migrate
+      end
+    end
+    
+    private
+    def running?
+      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:migrate:status 2>/dev/null"})
+    end
+    
+    def create_and_migrate
+      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:create db:schema:load"})
+    end
+  end
+  
+  class Fetcher
+    def initialize(app)
+      @app = app
+    end
+    
+    def fetch
+      clone_repo unless File.exists?(@app.dir)
+      pull
+    end
+    
+    private
+    def clone_repo
+      `(
+        cd #{WORKING_DIR} 
+        git clone --depth=1 #{@app.git_repo} -b#{@app.branch}
+      )`
+    end
+    
+    def pull
+      `(
+        cd #{@app.dir}
+        git checkout #{@app.branch}
+        git pull origin #{@app.branch}
+      )`
+    end
+  end
+  
+  
+  class App
+    attr_reader :name, :branch, :git_repo, :dir
+    
+    def initialize(name, options)
+      @name = name
+      @branch = options["branch"]
+      @git_repo = options["git_repo"]
+      @dir = "#{WORKING_DIR}/#{@name}"
+    end
+  end
+end
 
-ROOT=$(pwd)
-DUCKULA_DIR=$ROOT/duckula
-WORKING_DIR=$DUCKULA_DIR/tmp
+include Duckula
 
-source $DUCKULA_DIR/duckula.conf
+root = `printf $PWD`
+config_file = "#{root}/duckula/duckula.yml"
+WORKING_DIR = "#{root}/duckula/tmp"
+DUCKULA_DIR = "#{root}/duckula"
 
-SERVICE_DIR=$WORKING_DIR/$REPO_NAME
-CONFIG_DIR=$DUCKULA_DIR/$REPO_NAME
+QUACKER = Duckula::Quacker.new
 
-mkdir -p $WORKING_DIR
-cd $WORKING_DIR
+unless File.exist?(config_file)
+  QUACKER.puts "expected to find configuration file in #{config_file}"
+  exit 1
+end
 
-up() {
-  if ! [ -d $SERVICE_DIR ]; then
-    git clone --depth=1 $REPO_ADDRESS -b$REPO_BRANCH
-  fi
-
-  cd $SERVICE_DIR
-  git checkout $REPO_BRANCH
-  git pull origin $REPO_BRANCH
-  cd $DUCKULA_DIR
-  docker-compose up
-}
-
-
-case "$1" in
-  up)
-    $1
-esac
+docker_compose = DockerCompose.new
+setup_workspace(WORKING_DIR)
+apps = build_apps(config_file)
+engine = Engine.new(apps, docker_compose)
+engine.run(*ARGV)
