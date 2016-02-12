@@ -15,15 +15,15 @@ mkdir -p $WORKING_DIR
 cd $WORKING_DIR
 
 up() {
-	if ! [ -d $SERVICE_DIR ]; then
-		git clone --depth=1 $REPO_ADDRESS -b$REPO_BRANCH
-	fi
-	
-	cd $SERVICE_DIR
-	git checkout $REPO_BRANCH
-	git pull origin $REPO_BRANCH
-	cd $DUCKULA_DIR
-	docker-compose up
+  if ! [ -d $SERVICE_DIR ]; then
+    git clone --depth=1 $REPO_ADDRESS -b$REPO_BRANCH
+  fi
+
+  cd $SERVICE_DIR
+  git checkout $REPO_BRANCH
+  git pull origin $REPO_BRANCH
+  cd $DUCKULA_DIR
+  docker-compose up
 }
 
 
