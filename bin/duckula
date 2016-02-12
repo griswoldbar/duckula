@@ -3,32 +3,15 @@ require 'yaml'
 require 'fileutils'
 require 'pry'
 
-module Duckula
-  class DockerCompose
-    def up
-      invoke("up")
-    end
-    
-    def stop
-      invoke("stop")
-    end
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "/../lib/duckula"))
+require 'app'
+require 'db_handler'
+require 'docker_compose'
+require 'engine'
+require 'fetcher'
+require 'quacker'
 
-    def run(app_name, cmd)
-      invoke("run #{app_name} #{cmd}")
-    end
-    
-    private
-    def invoke(args)
-      system "cd #{DUCKULA_DIR} && docker-compose #{args}"
-    end
-  end
-  
-  class Quacker
-    def puts(str)
-      puts "quack! #{str} quack!"
-    end
-  end
-  
+module Duckula  
   def build_apps(config_file)
     @configs = YAML.load_file(config_file).each_pair.map do |k,v|
       App.new(k,v)
@@ -39,104 +22,6 @@ module Duckula
     FileUtils.mkdir_p(dir)
   end
   
-  class Engine
-    def initialize(apps, docker_compose)
-      @apps = apps
-      @dc = docker_compose
-    end
-    
-    def run(*args)
-      send(*args)
-    end
-    
-    def up
-      setup_workspaces
-      setup_dbs
-      @dc.up
-    end
-    
-    def stop
-      @dc.stop
-    end
-    
-    def migrate
-      
-    end
-    
-    private
-    def setup_workspaces
-      @apps.each do |app|
-        Fetcher.new(app).fetch
-      end
-    end
-    
-    def setup_dbs
-      @apps.each do |app|
-        DbHandler.new(app, @dc).setup
-      end
-    end
-  end
-  
-  class DbHandler
-    def initialize(app, dc)
-      @app = app
-      @dc = dc
-    end
-    
-    def setup
-      unless running?
-        create_and_migrate
-      end
-    end
-    
-    private
-    def running?
-      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:migrate:status 2>/dev/null"})
-    end
-    
-    def create_and_migrate
-      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:create db:schema:load"})
-    end
-  end
-  
-  class Fetcher
-    def initialize(app)
-      @app = app
-    end
-    
-    def fetch
-      clone_repo unless File.exists?(@app.dir)
-      pull
-    end
-    
-    private
-    def clone_repo
-      `(
-        cd #{WORKING_DIR} 
-        git clone --depth=1 #{@app.git_repo} -b#{@app.branch}
-      )`
-    end
-    
-    def pull
-      `(
-        cd #{@app.dir}
-        git checkout #{@app.branch}
-        git pull origin #{@app.branch}
-      )`
-    end
-  end
-  
-  
-  class App
-    attr_reader :name, :branch, :git_repo, :dir
-    
-    def initialize(name, options)
-      @name = name
-      @branch = options["branch"]
-      @git_repo = options["git_repo"]
-      @dir = "#{WORKING_DIR}/#{@name}"
-    end
-  end
 end
 
 include Duckula
@@ -149,7 +34,7 @@ DUCKULA_DIR = "#{root}/duckula"
 QUACKER = Duckula::Quacker.new
 
 unless File.exist?(config_file)
-  QUACKER.puts "expected to find configuration file in #{config_file}"
+  QUACKER.say "expected to find configuration file in #{config_file}"
   exit 1
 end
 
