@@ -6,18 +6,24 @@ module Duckula
     end
     
     def setup
-      unless running?
-        create_and_migrate
+      if db_exists?
+        rake_run("db:migrate")
+      else
+        rake_run("db:setup")
       end
     end
     
-    private
-    def running?
-      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:migrate:status 2>/dev/null"})
+    def reset
+      rake_run("db:reset")
     end
     
-    def create_and_migrate
-      @dc.run(@app.name, %Q{bash -c "bundle exec rake db:create db:schema:load"})
+    private
+    def db_exists?
+      rake_run("db:migrate:status 2>/dev/null")
+    end
+    
+    def rake_run(cmd)
+      @dc.run(@app.name, "bundle exec rake #{cmd}")
     end
   end
 end

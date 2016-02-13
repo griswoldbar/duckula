@@ -10,17 +10,9 @@ require 'docker_compose'
 require 'engine'
 require 'fetcher'
 require 'quacker'
+require 'runner'
 
-module Duckula  
-  def build_apps(config_file)
-    @configs = YAML.load_file(config_file).each_pair.map do |k,v|
-      App.new(k,v)
-    end
-  end
-  
-  def setup_workspace(dir)
-    FileUtils.mkdir_p(dir)
-  end
+module Duckula
   
 end
 
@@ -38,8 +30,16 @@ unless File.exist?(config_file)
   exit 1
 end
 
-docker_compose = DockerCompose.new
-setup_workspace(WORKING_DIR)
-apps = build_apps(config_file)
+FileUtils.mkdir_p(WORKING_DIR)
+
+docker_compose = DockerCompose.new(Runner.new)
+apps = YAML.load_file(config_file).each_pair.map do |k,v|
+  App.new(k,v,docker_compose,DbHandler,Fetcher)
+end
 engine = Engine.new(apps, docker_compose)
 engine.run(*ARGV)
+
+
+# cases to deal with:
+# - gems change in repo
+# - initializer added

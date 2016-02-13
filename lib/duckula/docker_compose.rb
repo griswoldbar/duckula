@@ -1,5 +1,9 @@
 module Duckula
   class DockerCompose
+    def initialize(runner)
+      @runner = runner
+    end
+    
     def up
       invoke("up")
     end
@@ -9,10 +13,9 @@ module Duckula
     end
 
     def run(app_name, cmd)
-      invoke("run #{app_name} #{cmd}")
+      @runner.run(self, app_name, cmd)
     end
     
-    private
     def invoke(args)
       system "cd #{DUCKULA_DIR} && docker-compose #{args}"
     end

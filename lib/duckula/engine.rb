@@ -10,8 +10,8 @@ module Duckula
     end
     
     def up
-      setup_workspaces
-      setup_dbs
+      @apps.each(&:fetch)
+      @apps.each(&:setup_db)
       @dc.up
     end
     
@@ -19,21 +19,9 @@ module Duckula
       @dc.stop
     end
     
-    def migrate
-      
+    def reset
+      @apps.each(&:reset)
     end
-    
-    private
-    def setup_workspaces
-      @apps.each do |app|
-        Fetcher.new(app).fetch
-      end
-    end
-    
-    def setup_dbs
-      @apps.each do |app|
-        DbHandler.new(app, @dc).setup
-      end
-    end
+
   end
 end
