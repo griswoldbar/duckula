@@ -36,9 +36,12 @@ module Duckula
     def reset
       @db_handler.reset
     end
-    
-    def update_if_stale
-      @docker_handler.update_if_stale
+
+    def stale?
+      @docker_handler.stale?
     end
+    # def update_if_stale
+    #   @docker_handler.update_if_stale
+    # end
   end
 end

@@ -8,11 +8,11 @@ module Duckula
       @image_name = config["image"]
     end
     
-    def update_if_stale
-      if stale?
-        true
-      end
-    end
+    # def update_if_stale
+    #   if stale?
+    #     true
+    #   end
+    # end
     
     def stale?
       current_image_id = docker_run(%Q{inspect --format "{{.Id}}" #{@image_name}})

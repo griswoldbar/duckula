@@ -15,6 +15,8 @@ DUCKULA_DIR = "#{ROOT}/duckula"
 JOBS = {}
 module Duckula
   class Session
+    attr_reader :engine
+    
     def initialize
       config_file = "#{ROOT}/duckula/duckula.yml"
       compose_file = "#{ROOT}/duckula/docker-compose.yml"
@@ -46,7 +48,7 @@ module Duckula
       end
       
       @engine = Engine.new(apps, docker_compose)
-      @reloader = Reloader.new(apps)
+      @reloader = Reloader.new(apps, self)
     end
     
     def run(*args)
@@ -56,6 +58,7 @@ module Duckula
       JOBS[:reloader] = Thread.new do
         @reloader.run
       end
+      # binding.pry
       JOBS.values.map(&:join)
     end
     
