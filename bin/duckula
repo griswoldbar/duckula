@@ -4,45 +4,15 @@ require 'fileutils'
 require 'pry'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "/../lib/duckula"))
-require 'app'
-require 'db_handler'
-require 'docker_compose'
-require 'engine'
-require 'fetcher'
-require 'quacker'
-require 'runner'
-
-module Duckula
-  
-end
-
-include Duckula
-
-root = `printf $PWD`
-config_file = "#{root}/duckula/duckula.yml"
-WORKING_DIR = "#{root}/duckula/tmp"
-DUCKULA_DIR = "#{root}/duckula"
-
-QUACKER = Duckula::Quacker.new
-
-unless File.exist?(config_file)
-  QUACKER.error "expected to find configuration file in #{config_file}"
-  exit 1
-end
-
-FileUtils.mkdir_p(WORKING_DIR)
-
-docker_compose = DockerCompose.new(Runner.new)
-apps = YAML.load_file(config_file).each_pair.map do |k,v|
-  App.new(k,v,docker_compose,DbHandler,Fetcher)
-end
-engine = Engine.new(apps, docker_compose)
+require 'session'
 
 begin
-  engine.run(*ARGV)
+  session = Duckula::Session.new
+  session.run(*ARGV)
 rescue Interrupt
-  engine.stop
+  session.stop
 end
+
 
 # cases to deal with:
 # - gems change in repo -> could probs use "run" at start to check
