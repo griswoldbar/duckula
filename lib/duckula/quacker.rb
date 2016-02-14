@@ -6,6 +6,7 @@ module Duckula
     
     def error(str)
       puts "QUACK! #{str}"
+      exit 1
     end
   end
 end

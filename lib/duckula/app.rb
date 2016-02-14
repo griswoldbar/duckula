@@ -2,14 +2,23 @@ module Duckula
   class App
     attr_reader :name, :branch, :git_repo, :dir
     
-    def initialize(name, options, docker_compose, db_handler, fetcher)
+    def initialize(
+        name:,
+        config:,
+        compose_config:,
+        docker_compose:,
+        db_handler:,
+        fetcher:,
+        docker_handler:
+      )
       @name = name
-      @branch = options["branch"]
-      @git_repo = options["git_repo"]
+      @branch = config["branch"]
+      @git_repo = config["git_repo"]
       @dir = "#{WORKING_DIR}/#{@name}"
       @dc = docker_compose
       @db_handler = db_handler.new(self, @dc)
       @fetcher = fetcher.new(self)
+      @docker_handler = docker_handler.new(self, @dc, compose_config)
     end
     
     def docker_pull
@@ -26,6 +35,10 @@ module Duckula
     
     def reset
       @db_handler.reset
+    end
+    
+    def update_if_stale
+      @docker_handler.update_if_stale
     end
   end
 end

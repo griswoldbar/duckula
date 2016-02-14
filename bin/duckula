@@ -14,7 +14,12 @@ rescue Interrupt
 end
 
 
+
 # cases to deal with:
 # - gems change in repo -> could probs use "run" at start to check
   # add a hook so that new builds are made of tagapi when we push to github
 # - initializer added
+# - check that docker-compose.yml and duckula.yml are consistent (e.g. both refer to 'tagapi')
+
+#useful:
+# http://stackoverflow.com/questions/26423515/how-to-automatically-update-your-docker-containers-if-base-images-are-updated
