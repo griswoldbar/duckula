@@ -26,7 +26,7 @@ DUCKULA_DIR = "#{root}/duckula"
 QUACKER = Duckula::Quacker.new
 
 unless File.exist?(config_file)
-  QUACKER.say "expected to find configuration file in #{config_file}"
+  QUACKER.error "expected to find configuration file in #{config_file}"
   exit 1
 end
 
@@ -41,5 +41,6 @@ engine.run(*ARGV)
 
 
 # cases to deal with:
-# - gems change in repo
+# - gems change in repo -> could probs use "run" at start to check
+  # add a hook so that new builds are made of tagapi when we push to github
 # - initializer added

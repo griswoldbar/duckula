@@ -10,12 +10,15 @@ module Duckula
     end
     
     def up
+      QUACKER.say("powering up...")
+      @apps.each(&:docker_pull)
       @apps.each(&:fetch)
       @apps.each(&:setup_db)
       @dc.up
     end
     
     def stop
+      QUACKER.say("powering down...")
       @dc.stop
     end
     

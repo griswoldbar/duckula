@@ -12,6 +12,10 @@ module Duckula
       @fetcher = fetcher.new(self)
     end
     
+    def docker_pull
+      @dc.pull(self.name)
+    end
+    
     def fetch
       @fetcher.fetch
     end

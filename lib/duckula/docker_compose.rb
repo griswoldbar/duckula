@@ -16,6 +16,10 @@ module Duckula
       @runner.run(self, app_name, cmd)
     end
     
+    def pull(app_name)
+      invoke("pull #{app_name}")
+    end
+    
     def invoke(args)
       system "cd #{DUCKULA_DIR} && docker-compose #{args}"
     end
