@@ -37,8 +37,12 @@ apps = YAML.load_file(config_file).each_pair.map do |k,v|
   App.new(k,v,docker_compose,DbHandler,Fetcher)
 end
 engine = Engine.new(apps, docker_compose)
-engine.run(*ARGV)
 
+begin
+  engine.run(*ARGV)
+rescue Interrupt
+  engine.stop
+end
 
 # cases to deal with:
 # - gems change in repo -> could probs use "run" at start to check
