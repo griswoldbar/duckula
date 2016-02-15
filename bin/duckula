@@ -5,6 +5,7 @@ require 'pry'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "/../lib/duckula"))
 require 'session'
+DUCKULA = __FILE__
 
 begin
   session = Duckula::Session.new

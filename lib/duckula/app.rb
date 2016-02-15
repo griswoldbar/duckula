@@ -27,6 +27,7 @@ module Duckula
     
     def fetch
       @git_handler.fetch
+      system(%Q{rm "#{@dir}/tmp/pids/server.pid"})
     end
     
     def setup_db
@@ -37,11 +38,8 @@ module Duckula
       @db_handler.reset
     end
 
-    # def stale?
-    #   @docker_handler.stale?
-    # end
-    # def update_if_stale
-    #   @docker_handler.update_if_stale
-    # end
+    def stale?
+      @docker_handler.stale?
+    end
   end
 end

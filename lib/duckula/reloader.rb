@@ -6,19 +6,21 @@ module Duckula
     end
     
     def run
-      puts "hai hai hai"
-      sleep 10
-      while true do
-        # if apps.map(&:stale?).any?
-          QUACKER.say("stale images detected. restarting services...")
-          binding.pry
-          JOBS[:engine].kill
-          JOBS[:engine] = Thread.new do
-            session.engine.run("up")
-          end
-        # end
-        sleep 5
-      end
+      #... not implemented yet
+      # Thread.new do
+      #   puts "reloader here..."
+      #   sleep 10
+      #   while true do
+      #     # if apps.map(&:stale?).any?
+      #       QUACKER.say("stale images detected. restarting services...")
+      #       # system(%Q{ echo "going to run kill -SIGINT #{Process.pid} && #{DUCKULA} up")
+      #       
+      #       IO.popen "kill -s INT '#{Process.pid}' && #{DUCKULA} up"
+      # 
+      #     # end
+      #     sleep 10
+      #   end
+      # end
     end
   end
 end

@@ -12,7 +12,7 @@ QUACKER = Duckula::Quacker.new
 ROOT = `printf $PWD`
 WORKING_DIR = "#{ROOT}/duckula/tmp"
 DUCKULA_DIR = "#{ROOT}/duckula"
-JOBS = {}
+
 module Duckula
   class Session
     attr_reader :engine
@@ -47,19 +47,11 @@ module Duckula
         )
       end
       
-      @engine = Engine.new(apps, docker_compose)
-      @reloader = Reloader.new(apps, self)
+      @engine = Engine.new(apps, docker_compose, Reloader)
     end
     
     def run(*args)
       @engine.run(*args)
-      # JOBS[:engine] = Thread.new do
-      #   @engine.run(*args)
-      # end
-      # JOBS[:reloader] = Thread.new do
-      #   @reloader.run
-      # end
-      # JOBS.values.map(&:join)
     end
     
     def stop
