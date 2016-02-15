@@ -1,5 +1,5 @@
 module Duckula
-  class Fetcher
+  class GitHandler
     def initialize(app)
       @app = app
     end

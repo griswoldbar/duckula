@@ -2,7 +2,7 @@ require 'app'
 require 'db_handler'
 require 'docker_compose'
 require 'engine'
-require 'fetcher'
+require 'git_handler'
 require 'quacker'
 require 'runner'
 require 'reloader'
@@ -42,7 +42,7 @@ module Duckula
           compose_config: compose_config,
           docker_compose: docker_compose,
           db_handler: DbHandler,
-          fetcher: Fetcher,
+          git_handler: GitHandler,
           docker_handler: DockerHandler
         )
       end
@@ -52,14 +52,14 @@ module Duckula
     end
     
     def run(*args)
-      JOBS[:engine] = Thread.new do
-        @engine.run(*args)
-      end
-      JOBS[:reloader] = Thread.new do
-        @reloader.run
-      end
-      # binding.pry
-      JOBS.values.map(&:join)
+      @engine.run(*args)
+      # JOBS[:engine] = Thread.new do
+      #   @engine.run(*args)
+      # end
+      # JOBS[:reloader] = Thread.new do
+      #   @reloader.run
+      # end
+      # JOBS.values.map(&:join)
     end
     
     def stop

@@ -8,7 +8,7 @@ module Duckula
         compose_config:,
         docker_compose:,
         db_handler:,
-        fetcher:,
+        git_handler:,
         docker_handler:
       )
       @name = name
@@ -17,7 +17,7 @@ module Duckula
       @dir = "#{WORKING_DIR}/#{@name}"
       @dc = docker_compose
       @db_handler = db_handler.new(self, @dc)
-      @fetcher = fetcher.new(self)
+      @git_handler = git_handler.new(self)
       @docker_handler = docker_handler.new(self, @dc, compose_config)
     end
     
@@ -26,7 +26,7 @@ module Duckula
     end
     
     def fetch
-      @fetcher.fetch
+      @git_handler.fetch
     end
     
     def setup_db
@@ -37,9 +37,9 @@ module Duckula
       @db_handler.reset
     end
 
-    def stale?
-      @docker_handler.stale?
-    end
+    # def stale?
+    #   @docker_handler.stale?
+    # end
     # def update_if_stale
     #   @docker_handler.update_if_stale
     # end
