@@ -28,5 +28,8 @@ module Duckula
       @apps.each(&:reset)
     end
 
+    def dc(app_name, cmd)
+      @dc.invoke("run #{app_name} #{cmd}")
+    end
   end
 end

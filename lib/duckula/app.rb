@@ -1,6 +1,6 @@
 module Duckula
   class App
-    attr_reader :name, :branch, :git_repo, :dir
+    attr_reader :name, :branch, :git_repo, :dir, :db_setup_command
     
     def initialize(
         name:,
@@ -19,6 +19,7 @@ module Duckula
       @db_handler = db_handler.new(self, @dc)
       @git_handler = git_handler.new(self)
       @docker_handler = docker_handler.new(self, @dc, compose_config)
+      @db_setup_command = config["db_setup_command"]
     end
     
     def docker_pull

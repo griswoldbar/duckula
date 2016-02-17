@@ -14,7 +14,7 @@ module Duckula
       else
         QUACKER.say("no db found!",2)
         QUACKER.say("setting up db...",2)
-        rake_run("db:setup")
+        db_setup
       end
     end
     
@@ -31,6 +31,11 @@ module Duckula
     
     def rake_run(cmd)
       @dc.run(@app.name, "bundle exec rake #{cmd}")
+    end
+
+    def db_setup
+      cmd = @app.db_setup_command || "db:setup"
+      rake_run(cmd)
     end
   end
 end
